@@ -3,96 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Alarm System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-        }
-        input[type="text"] {
-            width: 300px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #responseMessage {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+    <title>Alarm Bot</title>
 </head>
 <body>
-    <h1>Send an Alarm</h1>
+    <h1>Send Alarm to Telegram Bot</h1>
     <form id="alarmForm">
-        <input type="text" id="message" placeholder="Enter your alarm message" required />
+        <label for="message">Enter Alarm Message:</label>
+        <input type="text" id="message" name="message" required>
         <button type="submit">Send Alarm</button>
     </form>
     <p id="responseMessage"></p>
 
     <script>
-        const form = document.getElementById('alarmForm');
-        const responseMessage = document.getElementById('responseMessage');
+        document.getElementById('alarmForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting
 
-        // Telegram Bot Configurations
-        const TELEGRAM_BOT_TOKEN = '7508877374:AAEe1dvcX44sILf-jddVEjOu2DnnoKJsjkw'; // Replace with your bot's token
-        const CHAT_ID = 'YOUR_CHAT_ID'; // Replace with the chat ID where the alarm should be sent
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
             const message = document.getElementById('message').value;
+            const botToken = '7508877374:AAEe1dvcX44sILf-jddVEjOu2DnnoKJsjkw'; // Your bot token
+            const chatId = '<YOUR_CHAT_ID>'; // Replace this with your actual chat ID
 
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-            const payload = {
-                chat_id: CHAT_ID,
-                text: `🚨 Alarm: ${message}`,
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-
-                if (response.ok) {
-                    responseMessage.textContent = 'Alarm sent successfully!';
-                    responseMessage.style.color = 'green';
-                } else {
-                    responseMessage.textContent = 'Failed to send alarm. Please try again.';
-                    responseMessage.style.color = 'red';
-                }
-            } catch (error) {
-                responseMessage.textContent = 'An error occurred. Please try again.';
-                responseMessage.style.color = 'red';
+            // Check if message is not empty
+            if (!message) {
+                document.getElementById('responseMessage').textContent = 'Please enter a message.';
+                return;
             }
 
-            form.reset();
+            // Send the message to the Telegram bot
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId, // Specify where to send the message
+                    text: message // Message content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    document.getElementById('responseMessage').textContent = 'Alarm sent successfully!';
+                } else {
+                    document.getElementById('responseMessage').textContent = 'Error sending alarm. Please try again.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('responseMessage').textContent = 'An error occurred. Please try again.';
+            });
         });
     </script>
 </body>
